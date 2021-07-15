@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8/">
+    <title>Avatar Maker</title>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <link rel = "stylesheet" href="style.css">
+
+    <style>
+      html, body{
+        width : 99%; height : 99%;
+      }
+      .select_frame {
+        background :whitesmoke;
+        float: left;
+        width : 70%; height : 99%;
+        background : url("BG_image.png");
+        background-size : 100% 100%;
+        background-position:center;
+        align-items : center;
+      }
+      .placeholder {
+        height : 10%;
+      }
+      .display_frame{
+        background : skyblue;
+        float: left;
+        width : 30%; height : 99%;
+        font-size : 20pt; 
+        text-align : center;
+      }
+
+      #random_boxes {
+        width : 80%; height : 14%;
+        background-color : white;
+        margin : 1%;
+        box-shadow: 0 0 7px 1px rgba(0,0,0,0.3);
+        border-radius : 2px;
+        position : relative;
+        left : 10%;
+      }
+
+      #canvas {
+        background-color : white;
+        position : reltative;
+        width : 90%; height : 50%;
+        display : block;
+        margin-left : auto;
+        margin-right : auto;
+      }
+
+      #pointer{
+        width : 5%;
+        position : relative;
+        display : flex;
+      }
+  
+    </style>
+
+  </head>
+  <body>
+    <div class = "select_frame">
+      <div class = "placeholder"></div>
+      <div id = "random_boxes" class = "random_face">
+        <img id = face1 src = "Face_1.png" style = "width : 13%; padding-left : 5%;">
+        <img id = face2 src = "Face_2.png" style = "width : 13%; padding-left : 5%;">
+        <img id = face3 src = "Face_3.png" style = "width : 13%; padding-left : 5%;">
+        <img id = face4 src = "Face_4.png" style = "width : 13%; padding-left : 5%;">
+        <img id = face5 src = "Face_5.png" style = "width : 13%; padding-left : 5%;">
+      </div>
+      <div id = "random_boxes" class = "random_hair">
+        <img id = hair1 src = "Hair_1.png" style = "width : 13%; padding-left : 5%;">
+        <img id = hair2 src = "Hair_2.png" style = "width : 13%; padding-left : 5%;">
+        <img id = hair3 src = "Hair_3.png" style = "width : 13%; padding-left : 5%;">
+        <img id = hair4 src = "Hair_4.png" style = "width : 13%; padding-left : 5%;">
+        <img id = hair5 src = "Hair_5.png" style = "width : 13%; padding-left : 5%;">
+      </div>
+      <div id = "random_boxes" class = "random_eyes">
+        <img id = eyes1 src = "Eyes_1.png" style = "width : 13%; padding-left : 5%;">
+        <img id = eyes2 src = "Eyes_2.png" style = "width : 13%; padding-left : 5%;">
+        <img id = eyes3 src = "Eyes_3.png" style = "width : 13%; padding-left : 5%;">
+        <img id = eyes4 src = "Eyes_4.png" style = "width : 13%; padding-left : 5%;">
+        <img id = eyes5 src = "Eyes_5.png" style = "width : 13%; padding-left : 5%;">
+      </div>
+      <div id = "random_boxes" class = "random_nose">
+        <img id = nose1 src = "Nose_1_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = nose2 src = "Nose_2_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = nose3 src = "Nose_3_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = nose4 src = "Nose_4_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = nose5 src = "Nose_5_resized.png" style = "width : 13%; padding-left : 5%;">
+      </div>
+      <div id = "random_boxes" class = "random_mouth">
+        <img id = mouth1 src = "Mouth_1_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = mouth2 src = "Mouth_2_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = mouth3 src = "Mouth_3_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = mouth4 src = "Mouth_4_resized.png" style = "width : 13%; padding-left : 5%;">
+        <img id = mouth5 src = "Mouth_5_resized.png" style = "width : 13%; padding-left : 5%;">
+      </div>
+      <img id = "pointer" src = "">
+    </div>
+    <div class = "display_frame">
+      Your Avatar !!!
+      <canvas id = "canvas">
+       
+      </canvas>
+      
+      <input type = "button" value = "시작하기" id = "startBtn" onclick = "startGame()">
+      <input type = "button" value = "다음 요소로 넘어가기" id = "nextBtn" onclick = "nextItem()">
+      <input type = "button" value = "멈추기" id = "stopBtn" onclick = "stopMoving()">
+      <br><br>
+      <input type = "button" value = "*** 다시 만들기 ***" id = "restartBtn" onclick = "Restart()">
+
+    </div>
+
+
+    <script type = "text/javascript">
+
+        window.addEventListener("keydown", getKeyDown, false);
+	    	window.addEventListener("keyup", getKeyUp, false);
+       
+        //display 캔버스 변수
+        var canvas = document.getElementById("canvas");
+        var ctx = canvasFace.getContext('2d');
+
+
+        var image_selected = new Image();
+
+        //nextBtn 눌렀을 때 넘어 갈 얼굴 요소. 캔버스 출력시 파일명에 사용
+        var item = ["Face", "Hair", "Eyes", "Nose", "Mouth"];
+        var i = 0; // 얼굴 요소 배열위치
+
+        //포인팅 핸드 표시 및 위치
+        var pointer; //포인터 이미지 생성
+        var pX = 10; //포인터 첫 시작 위치
+        var step = 5; //interval 당 이동 거리 in %
+        var bottomMargin = 70; //포인터 bottom margin
+
+        var StopPos =0; //각 라인별 포인터 위치 트랙. 1 ~ 15. 시작과 동시에 1이기 때문. 추후 선택이미지 출력시 필요
+        var currentLine = 1; //각 요소라인 별로 포인터가 여러번 움직임. 우향/좌향에 따라 출력 이미지 다르게 하기 위해 트랙킹
+        var intervalHandles; 
+
+        //게임 시작 여부. 현재는 미사용.
+        //var STATE_GAME = false;
+
+
+        function startGame()
+        {
+            //STATE_GAME = true;
+            
+            pointer = document.getElementById("pointer");
+            pointer.src = "hand_pointer.png";
+            pointer.style.bottom = bottomMargin + "%";
+            
+            intervalHandles = setInterval("startMoving()", 20);
+
+            document.getElementById("nextBtn").disabled = true;
+
+            // if(i == 1)
+            // {
+            //   var canvasHair = document.createElement("canvas");
+            //   canvasHair.width = canvas.width;
+            //   canvasHair.height = canvas.height;
+            //   ctx = canvasHair.getContext("2d");
+            // }
+            // else if(i == 2)
+            // {
+            //   var canvasEyes = document.createElement("canvas");
+            //   canvasEyes.width = canvas.width;
+            //   canvasEyes.height = canvas.height;
+            //   ctx = canvasEyes.getContext("2d");
+            // }
+            // else if(i == 3)
+            // {
+            //   var canvasNose = document.createElement("canvas");
+            //   canvasNose.width = canvas.width;
+            //   canvasNose.height = canvas.height;
+            //   ctx = canvasNose.getContext("2d");
+            // }
+            // else if(i == 4)
+            // {
+            //   var canvasMouth = document.createElement("canvas");
+            //   canvasMouth.width = canvas.width;
+            //   canvasMouth.height = canvas.height;
+            //   ctx = canvasMousth.getContext("2d");
+            // }
+        }
+
+        function startMoving()
+        {
+            document.getElementById("startBtn").disabled = true;
+            pX += step;
+            pointer.style.left = pX + "%";
+            StopPos++;
+
+            if(StopPos == 15)
+            {
+            step = -step;
+            StopPos = 0;
+            currentLine ++;
+            }
+        }
+
+        function stopMoving()
+        {
+            
+            clearTimeout(intervalHandles);
+
+            if(currentLine%2 != 0) //홀수 줄
+            {
+            switch(StopPos)
+            {
+                case 1:
+                case 2:
+                case 3:
+                image_selected.src = item[i] + '_1.png';
+                break;
+                case 4:
+                case 5:
+                case 6:
+                image_selected.src = item[i] + '_2.png';
+                break;
+                case 7:
+                case 8:
+                case 9:
+                image_selected.src = item[i] + '_3.png';
+                break;
+                case 10:
+                case 11:
+                case 12:
+                image_selected.src = item[i] + '_4.png';
+                break;
+                case 13:
+                case 14:
+                case 15:
+                image_selected.src = item[i] + '_5.png';
+                break;
+            }
+            }
+            else //짝수 줄
+            {
+            switch(StopPos)
+            {
+                case 1:
+                case 2:
+                case 3:
+                image_selected.src = item[i] + '_5.png';
+                break;
+                case 4:
+                case 5:
+                case 6:
+                image_selected.src = item[i] + '_4.png';
+                break;
+                case 7:
+                case 8:
+                case 9:
+                image_selected.src = item[i] + '_3.png';
+                break;
+                case 10:
+                case 11:
+                case 12:
+                image_selected.src = item[i] + '_2.png';
+                break;
+                case 13:
+                case 14:
+                case 15:
+                image_selected.src = item[i] + '_1.png';
+                break;
+            }
+            }
+
+            
+            
+            ctx.drawImage(image_selected, 10, 10, 250, 150);
+            document.getElementById("nextBtn").disabled = false;
+
+            if(i == 4)
+            {
+            document.getElementById("nextBtn").disabled = true;
+            }
+        }
+
+        function update() 
+		{
+			 if (keyPressed[38]) 
+			 {
+		          sy -= 3;
+		          angle = 0;
+			 }
+			 if (keyPressed[40])
+			 {
+			      sy += 3;
+			      angle = 180;
+			 }
+			 if (keyPressed[37]) 
+			 {
+			      sx -= 3;
+			      angle = 270;
+			 }
+			 if (keyPressed[39]) 
+			 {
+			      sx += 3;
+			      angle = 90;
+			 }
+			 // 대각선 이동시의 각도 계산
+			 if (keyPressed[38] && keyPressed[39])
+			 {
+			      angle = 45;
+			 }
+			 if (keyPressed[39] && keyPressed[40])
+			 {
+				  angle = 135;
+			 }
+			 if (keyPressed[40] && keyPressed[37])
+			 {
+			      angle = 225;
+			 }
+			 if (keyPressed[37] && keyPressed[38])
+			 {
+			      angle = 315;
+			 }
+		}
+
+        function nextItem()
+        {
+        bottomMargin -= 15;
+        pointer.style.bottom = bottomMargin + "%";
+        pointer.style.left = 10 + "%";
+        document.getElementById("startBtn").disabled = false;
+        i++;
+        }
+
+        function Restart()
+        {
+            window.location.reload(true);
+        }
+    </script>
+  </body> 
+</html>
